@@ -1,0 +1,114 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+struct Employee {
+    int id;
+    char name[50];
+    char designation[50];
+    float salary;
+};
+
+const char* DATA_FILE = "employees.dat";
+
+void addEmployee() {
+    Employee emp;
+    ofstream out(DATA_FILE, ios::binary | ios::app);
+
+    cout << "Enter ID: ";
+    cin >> emp.id;
+    cin.ignore();
+
+    cout << "Enter Name: ";
+    cin.getline(emp.name, 50);
+
+    cout << "Enter Designation: ";
+    cin.getline(emp.designation, 50);
+
+    cout << "Enter Salary: ";
+    cin >> emp.salary;
+
+    out.write((char*)&emp, sizeof(emp));
+    out.close();
+
+    cout << "Employee added.\n";
+}
+
+void displayEmployee() {
+    int searchId;
+    cout << "Enter ID to search: ";
+    cin >> searchId;
+
+    ifstream in(DATA_FILE, ios::binary);
+    Employee emp;
+    bool found = false;
+
+    while (in.read((char*)&emp, sizeof(emp))) {
+        if (emp.id == searchId) {
+            cout << "\nID: " << emp.id << "\n";
+            cout << "Name: " << emp.name << "\n";
+            cout << "Designation: " << emp.designation << "\n";
+            cout << "Salary: " << emp.salary << "\n";
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Employee not found.\n";
+    }
+
+    in.close();
+}
+
+void deleteEmployee() {
+    int deleteId;
+    cout << "Enter ID to delete: ";
+    cin >> deleteId;
+
+    ifstream in(DATA_FILE, ios::binary);
+    ofstream temp("temp.dat", ios::binary);
+
+    Employee emp;
+    bool deleted = false;
+
+    while (in.read((char*)&emp, sizeof(emp))) {
+        if (emp.id != deleteId) {
+            temp.write((char*)&emp, sizeof(emp));
+        } else {
+            deleted = true;
+        }
+    }
+
+    in.close();
+    temp.close();
+
+    remove(DATA_FILE);
+    rename("temp.dat", DATA_FILE);
+
+    if (deleted)
+        cout << "Employee deleted.\n";
+    else
+        cout << "Employee not found.\n";
+}
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n1. Add Employee\n2. Display Employee\n3. Delete Employee\n4. Exit\nEnter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: addEmployee(); break;
+            case 2: displayEmployee(); break;
+            case 3: deleteEmployee(); break;
+            case 4: cout << "Goodbye!\n"; break;
+            default: cout << "Invalid choice.\n";
+        }
+    } while (choice != 4);
+
+    return 0;
+}

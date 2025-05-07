@@ -1,0 +1,141 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int MAX = 50;
+
+struct Connection {
+    char dest[MAX];
+    int cost;
+    Connection* next;
+};
+
+struct City {
+    char name[MAX];
+    Connection* head;
+    bool visited;
+};
+
+class FlightGraph {
+    City cities[MAX];
+    int cityCount;
+
+    int findCity(const char* name) {
+        for (int i = 0; i < cityCount; i++)
+            if (strcmp(cities[i].name, name) == 0)
+                return i;
+        return -1;
+    }
+
+    void resetVisited() {
+        for (int i = 0; i < cityCount; i++)
+            cities[i].visited = false;
+    }
+
+public:
+    FlightGraph() {
+        cityCount = 0;
+    }
+
+    void addCity(const char* name) {
+        if (cityCount >= MAX) {
+            cout << "City limit reached!" << endl;
+            return;
+        }
+        strcpy(cities[cityCount].name, name);
+        cities[cityCount].head = NULL;
+        cities[cityCount].visited = false;
+        cityCount++;
+    }
+
+    void addFlight(const char* from, const char* to, int cost) {
+        int i = findCity(from), j = findCity(to);
+        if (i == -1 || j == -1) {
+            cout << "Invalid city name(s)." << endl;
+            return;
+        }
+
+        Connection* c1 = new Connection;
+        strcpy(c1->dest, to);
+        c1->cost = cost;
+        c1->next = cities[i].head;
+        cities[i].head = c1;
+
+        Connection* c2 = new Connection;
+        strcpy(c2->dest, from);
+        c2->cost = cost;
+        c2->next = cities[j].head;
+        cities[j].head = c2;
+    }
+
+    void showGraph() {
+        for (int i = 0; i < cityCount; i++) {
+            cout << cities[i].name << ": ";
+            Connection* c = cities[i].head;
+            while (c != NULL) {
+                cout << "-> " << c->dest << " (" << c->cost << ") ";
+                c = c->next;
+            }
+            cout << endl;
+        }
+    }
+
+    bool isConnected() {
+        if (cityCount == 0)
+            return true;
+
+        resetVisited();
+        int queue[MAX], front = 0, rear = 0;
+        cities[0].visited = true;
+        queue[rear++] = 0;
+        int visitedCount = 1;
+
+        while (front < rear) {
+            int curr = queue[front++];
+            Connection* c = cities[curr].head;
+            while (c != NULL) {
+                int idx = findCity(c->dest);
+                if (idx != -1 && !cities[idx].visited) {
+                    cities[idx].visited = true;
+                    queue[rear++] = idx;
+                    visitedCount++;
+                }
+                c = c->next;
+            }
+        }
+
+        return visitedCount == cityCount;
+    }
+};
+
+int main() {
+    FlightGraph g;
+    int n, m, cost;
+    char name[MAX], from[MAX], to[MAX];
+
+    cout << "Enter number of cities: ";
+    cin >> n;
+    cin.ignore();
+    for (int i = 0; i < n; i++) {
+        cout << "City " << i + 1 << ": ";
+        cin.getline(name, MAX);
+        g.addCity(name);
+    }
+
+    cout << "Enter number of flights: ";
+    cin >> m;
+    cin.ignore();
+    for (int i = 0; i < m; i++) {
+        cout << "From: "; cin.getline(from, MAX);
+        cout << "To: "; cin.getline(to, MAX);
+        cout << "Cost: "; cin >> cost; cin.ignore();
+        g.addFlight(from, to, cost);
+    }
+
+    cout << "\nFlight Network:\n";
+    g.showGraph();
+
+    cout << "\nThe network is " << (g.isConnected() ? "connected" : "not connected") << ".\n";
+
+    return 0;
+}

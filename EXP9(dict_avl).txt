@@ -1,0 +1,134 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+struct Node {
+    char keyword[50];
+    char meaning[200];
+    Node *left, *right;
+    int height;
+    
+    Node(const char* k, const char* m) : left(NULL), right(NULL), height(1) {
+        strcpy(keyword, k);
+        strcpy(meaning, m);
+    }
+};
+
+class AVLDictionary {
+    Node* root;
+    
+    int height(Node* n) { return n ? n->height : 0; }
+    int balance(Node* n) { return n ? height(n->left) - height(n->right) : 0; }
+    
+    Node* rotateRight(Node* y) {
+        Node* x = y->left;
+        y->left = x->right;
+        x->right = y;
+        y->height = max(height(y->left), height(y->right)) + 1;
+        x->height = max(height(x->left), height(x->right)) + 1;
+        return x;
+    }
+    
+    Node* rotateLeft(Node* x) {
+        Node* y = x->right;
+        x->right = y->left;
+        y->left = x;
+        x->height = max(height(x->left), height(x->right)) + 1;
+        y->height = max(height(y->left), height(y->right)) + 1;
+        return y;
+    }
+    
+    Node* insert(Node* node, const char* key, const char* meaning) {
+        if (!node) return new Node(key, meaning);
+        
+        int cmp = strcmp(key, node->keyword);
+        if (cmp < 0) node->left = insert(node->left, key, meaning);
+        else if (cmp > 0) node->right = insert(node->right, key, meaning);
+        else { strcpy(node->meaning, meaning); return node; }
+        
+        node->height = 1 + max(height(node->left), height(node->right));
+        int bal = balance(node);
+        
+        if (bal > 1 && strcmp(key, node->left->keyword) < 0) return rotateRight(node);
+        if (bal < -1 && strcmp(key, node->right->keyword) > 0) return rotateLeft(node);
+        if (bal > 1 && strcmp(key, node->left->keyword) > 0) {
+            node->left = rotateLeft(node->left);
+            return rotateRight(node);
+        }
+        if (bal < -1 && strcmp(key, node->right->keyword) < 0) {
+            node->right = rotateRight(node->right);
+            return rotateLeft(node);
+        }
+        
+        return node;
+    }
+    
+    void inorder(Node* n) {
+        if (!n) return;
+        inorder(n->left);
+        cout << n->keyword << ": " << n->meaning << endl;
+        inorder(n->right);
+    }
+    
+    Node* search(Node* n, const char* key, int& cmpCount) {
+        if (!n) return NULL;
+        cmpCount++;
+        int cmp = strcmp(key, n->keyword);
+        if (cmp == 0) return n;
+        return search(cmp < 0 ? n->left : n->right, key, cmpCount);
+    }
+
+public:
+    AVLDictionary() : root(NULL) {}
+    
+    void add(const char* key, const char* meaning) {
+        root = insert(root, key, meaning);
+    }
+    
+    void lookup(const char* key) {
+        int cmp = 0;
+        Node* found = search(root, key, cmp);
+        if (found) {
+            cout << "Found: " << found->meaning << "\n";
+            cout << "Comparisons: " << cmp << ", Height: " << height(root) << "\n";
+        } else {
+            cout << "Not found\n";
+        }
+    }
+    
+    void display() {
+        cout << "Dictionary Contents:\n";
+        inorder(root);
+    }
+};
+
+int main() {
+    AVLDictionary dict;
+    char key[50], meaning[200];
+    int choice;
+    
+    while (true) {
+        cout << "\nMenu:\n1. Add\n2. Search\n3. Display\n4. Exit\nChoice: ";
+        cin >> choice;
+        cin.ignore();
+        
+        switch (choice) {
+            case 1:
+                cout << "Enter keyword: "; cin.getline(key, 50);
+                cout << "Enter meaning: "; cin.getline(meaning, 200);
+                dict.add(key, meaning);
+                break;
+            case 2:
+                cout << "Enter keyword: "; cin.getline(key, 50);
+                dict.lookup(key);
+                break;
+            case 3:
+                dict.display();
+                break;
+            case 4:
+                return 0;
+            default:
+                cout << "Invalid choice\n";
+        }
+    }
+}

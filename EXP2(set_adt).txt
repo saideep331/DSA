@@ -1,0 +1,143 @@
+class CustomSet:
+    def __init__(self):
+        self.items = []
+
+    def add(self, element):
+        if element not in self.items:
+            self.items.append(element)
+        else:
+            print(f"{element} already exists.")
+
+    def remove(self, element):
+        if element in self.items:
+            self.items.remove(element)
+        else:
+            print(f"{element} not found in the set.")
+
+    def contains(self, element):
+        return element in self.items
+
+    def size(self):
+        return len(self.items)
+
+    def iterator(self):
+        return iter(self.items)
+
+    def intersection(self, other_set):
+        result = CustomSet()
+        for item in self.items:
+            if item in other_set.items:
+                result.add(item)
+        return result
+
+    def union(self, other_set):
+        result = CustomSet()
+        for item in self.items:
+            result.add(item)
+        for item in other_set.items:
+            result.add(item)
+        return result
+
+    def difference(self, other_set):
+        result = CustomSet()
+        for item in self.items:
+            if item not in other_set.items:
+                result.add(item)
+        return result
+
+    def is_subset(self, other_set):
+        for item in self.items:
+            if item not in other_set.items:
+                return False
+        return True
+
+    def display(self):
+        print("{", ", ".join(str(item) for item in self.items), "}")
+
+
+# ---------------- Menu Interface ----------------
+def main():
+    setA = CustomSet()
+    setB = CustomSet()
+
+    while True:
+        print("\n========= Set ADT Menu =========")
+        print("1. Add elements to Set A")
+        print("2. Add elements to Set B")
+        print("3. Remove element from Set A")
+        print("4. Remove element from Set B")
+        print("5. Display Sets")
+        print("6. Check if element is in Set A")
+        print("7. Size of Set A and B")
+        print("8. Union (A ∪ B)")
+        print("9. Intersection (A ∩ B)")
+        print("10. Difference (A - B)")
+        print("11. Check if A is subset of B")
+        print("12. Iterate over Set A")
+        print("13. Exit")
+        print("=================================")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            num_elements = int(input("How many elements do you want to add to Set A? "))
+            for _ in range(num_elements):
+                ele = input(f"Enter element to add to Set A: ")
+                setA.add(ele)
+
+        elif choice == "2":
+            num_elements = int(input("How many elements do you want to add to Set B? "))
+            for _ in range(num_elements):
+                ele = input(f"Enter element to add to Set B: ")
+                setB.add(ele)
+
+        elif choice == "3":
+            ele = input("Enter element to remove from Set A: ")
+            setA.remove(ele)
+
+        elif choice == "4":
+            ele = input("Enter element to remove from Set B: ")
+            setB.remove(ele)
+
+        elif choice == "5":
+            print("Set A:", end=" ")
+            setA.display()
+            print("Set B:", end=" ")
+            setB.display()
+
+        elif choice == "6":
+            ele = input("Enter element to check in Set A: ")
+            print("Found!" if setA.contains(ele) else "Not Found!")
+
+        elif choice == "7":
+            print(f"Size of Set A: {setA.size()}")
+            print(f"Size of Set B: {setB.size()}")
+
+        elif choice == "8":
+            print("Union (A ∪ B):", end=" ")
+            setA.union(setB).display()
+
+        elif choice == "9":
+            print("Intersection (A ∩ B):", end=" ")
+            setA.intersection(setB).display()
+
+        elif choice == "10":
+            print("Difference (A - B):", end=" ")
+            setA.difference(setB).display()
+
+        elif choice == "11":
+            print("Set A is subset of B" if setA.is_subset(setB) else "Set A is not a subset of B")
+
+        elif choice == "12":
+            print("Elements in Set A:")
+            for item in setA.iterator():
+                print(item)
+
+        elif choice == "13":
+            print("Exiting program.")
+            break
+
+        else:
+            print("Invalid choice! Please try again.")
+
+main()

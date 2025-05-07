@@ -1,0 +1,95 @@
+#include <iostream>
+#include <algorithm> // For sort()
+using namespace std;
+
+struct Edge {
+    int src, dest, weight;
+};
+
+// Simple comparison function for sorting
+bool compareEdges(Edge a, Edge b) {
+    return a.weight < b.weight;
+}
+
+class DisjointSet {
+    int *parent, *rank, n;
+    
+public:
+    DisjointSet(int n) {
+        this->n = n;
+        parent = new int[n];
+        rank = new int[n];
+        
+        for(int i=0; i<n; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+    
+    int find(int u) {
+        if(u != parent[u])
+            parent[u] = find(parent[u]);
+        return parent[u];
+    }
+    
+    void unionSets(int u, int v) {
+        u = find(u);
+        v = find(v);
+        
+        if(rank[u] > rank[v])
+            parent[v] = u;
+        else
+            parent[u] = v;
+            
+        if(rank[u] == rank[v])
+            rank[v]++;
+    }
+};
+
+void findMST(Edge edges[], int numEdges, int numOffices) {
+    // Sort edges using STL sort
+    sort(edges, edges + numEdges, compareEdges);
+    
+    DisjointSet ds(numOffices);
+    Edge result[numOffices-1];
+    int e = 0, i = 0;
+    
+    while(e < numOffices-1 && i < numEdges) {
+        Edge next = edges[i++];
+        int x = ds.find(next.src);
+        int y = ds.find(next.dest);
+        
+        if(x != y) {
+            result[e++] = next;
+            ds.unionSets(x, y);
+        }
+    }
+    cout << "\nMinimum Spanning Tree:\n";
+    cout << "From\tTo\tCost\n";
+    int total = 0;
+    for(i=0; i<e; i++) {
+        cout << result[i].src << "\t" << result[i].dest << "\t" << result[i].weight << endl;
+        total += result[i].weight;
+    }
+    cout << "Total cost: " << total << endl;
+}
+
+int main() {
+    int numOffices, numConnections;
+    
+    cout << "Enter number of offices: ";
+    cin >> numOffices;
+    cout << "Enter number of connections: ";
+    cin >> numConnections;
+    
+    Edge edges[numConnections];
+    
+    cout << "Enter connections (from to cost):\n";
+    for(int i=0; i<numConnections; i++) {
+        cin >> edges[i].src >> edges[i].dest >> edges[i].weight;
+    }
+    
+    findMST(edges, numConnections, numOffices);
+    
+    return 0;
+}

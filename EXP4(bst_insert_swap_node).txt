@@ -1,0 +1,158 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+
+    Node(int val) : data(val), left(NULL), right(NULL) {}
+};
+
+class BST {
+private:
+    Node* root;
+
+    Node* insertRec(Node* root, int value) {
+        if (root == NULL) {
+            return new Node(value);
+        }
+        if (value < root->data) {
+            root->left = insertRec(root->left, value);
+        } else if (value > root->data) {
+            root->right = insertRec(root->right, value);
+        }
+        return root;
+    }
+
+    int findLongestPath(Node* root) {
+        if (root == NULL) return 0;
+        int leftDepth = findLongestPath(root->left);
+        int rightDepth = findLongestPath(root->right);
+        return max(leftDepth, rightDepth) + 1;
+    }
+
+    int findMinValue(Node* root) {
+        if (root == NULL) return -1;
+        while (root->left != NULL) {
+            root = root->left;
+        }
+        return root->data;
+    }
+
+    Node* swapPointers(Node* root) {
+        if (root == NULL) return NULL;
+        Node* temp = root->left;
+        root->left = swapPointers(root->right);
+        root->right = swapPointers(temp);
+        return root;
+    }
+
+    bool searchRec(Node* root, int value) {
+        if (root == NULL) return false;
+        if (root->data == value) return true;
+        if (value < root->data) return searchRec(root->left, value);
+        return searchRec(root->right, value);
+    }
+
+    void inorderRec(Node* root) {
+        if (root != NULL) {
+            inorderRec(root->left);
+            cout << root->data << " ";
+            inorderRec(root->right);
+        }
+    }
+
+public:
+    BST() : root(NULL) {}
+
+    void insert(int value) {
+        root = insertRec(root, value);
+    }
+
+    void display() {
+        cout << "Inorder Traversal: ";
+        inorderRec(root);
+        cout << endl;
+    }
+
+    int longestPath() {
+        return findLongestPath(root);
+    }
+
+    int minValue() {
+        return findMinValue(root);
+    }
+
+    void swapRoles() {
+        root = swapPointers(root);
+    }
+
+    bool search(int value) {
+        return searchRec(root, value);
+    }
+};
+
+int main() {
+    BST tree;
+    int choice, value, n;
+
+    cout << "Enter initial number of nodes to insert: ";
+    cin >> n;
+    cout << "Enter " << n << " values to insert: ";
+    for (int i = 0; i < n; i++) {
+        cin >> value;
+        tree.insert(value);
+    }
+
+    while (true) {
+        cout << "\nBST Operations Menu:\n";
+        cout << "1. Insert new node\n";
+        cout << "2. Find number of nodes in longest path from root\n";
+        cout << "3. Find minimum data value in the tree\n";
+        cout << "4. Swap left and right pointers at every node\n";
+        cout << "5. Search a value\n";
+        cout << "6. Display tree (inorder)\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> value;
+                tree.insert(value);
+                cout << value << " inserted successfully.\n";
+                break;
+            case 2:
+                cout << "Number of nodes in longest path: " << tree.longestPath() << endl;
+                break;
+            case 3:
+                cout << "Minimum value in tree: " << tree.minValue() << endl;
+                break;
+            case 4:
+                tree.swapRoles();
+                cout << "Left and right pointers swapped at every node.\n";
+                break;
+            case 5:
+                cout << "Enter value to search: ";
+                cin >> value;
+                if (tree.search(value)) {
+                    cout << value << " found in the tree.\n";
+                } else {
+                    cout << value << " not found in the tree.\n";
+                }
+                break;
+            case 6:
+                tree.display();
+                break;
+            case 7:
+                cout << "Exiting program...\n";
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
